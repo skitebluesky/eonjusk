@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오늘 뭐 먹지? | 저녁 메뉴 추천</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 99%, #FECFEF 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px 30px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 420px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        h1 {
+            color: #2D3748;
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        p.subtitle {
+            color: #718096;
+            font-size: 15px;
+            margin-bottom: 30px;
+        }
+
+        .display-card {
+            background: #FFF5F5;
+            border: 2px dashed #FEB2B2;
+            border-radius: 20px;
+            padding: 30px 20px;
+            margin-bottom: 30px;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .emoji {
+            font-size: 80px;
+            line-height: 1;
+            margin-bottom: 15px;
+            transition: transform 0.2s ease;
+            filter: drop-shadow(0 8px 12px rgba(0,0,0,0.08));
+        }
+
+        .food-name {
+            font-size: 22px;
+            font-weight: 700;
+            color: #E53E3E;
+            min-height: 33px;
+        }
+
+        .category-tag {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 4px 12px;
+            background-color: #FED7D7;
+            color: #9B2C2C;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 12px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .category-tag.show {
+            opacity: 1;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            font-size: 18px;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+            transition: all 0.2s ease;
+            width: 100%;
+            outline: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 5px 10px rgba(255, 107, 107, 0.2);
+        }
+
+        /* 애니메이션 효과 */
+        .rolling {
+            animation: bounce 0.15s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0) scale(1); }
+            to { transform: translateY(-10px) scale(1.05); }
+        }
+
+        .pop-in {
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>오늘 뭐 먹지? 🍽️</h1>
+        <p class="subtitle">결정장애를 위한 완벽한 저녁 메뉴 추천기</p>
+
+        <div class="display-card">
+            <div id="emoji" class="emoji">❓</div>
+            <div id="food-name" class="food-name">버튼을 눌러주세요!</div>
+            <div id="category" class="category-tag">카테고리</div>
+        </div>
+
+        <button id="recommend-btn" class="btn" onclick="recommendMenu()">저녁 메뉴 추천 받기 🎲</button>
+    </div>
+
+    <script>
+        // 메뉴 및 이모지 리스트 (자유롭게 추가/수정 가능)
+        const menuList = [
+            // 한식
+            { name: "김치찌개", emoji: "🥘", category: "한식" },
+            { name: "삼겹살", emoji: "🥓", category: "한식" },
+            { name: "비빔밥", emoji: "🥗", category: "한식" },
+            { name: "떡볶이", emoji: "🍢", category: "한식" },
+            { name: "치킨", emoji: "🍗", category: "한식" },
+            { name: "불고기", emoji: "🥩", category: "한식" },
+            { name: "국밥", emoji: "🍲", category: "한식" },
+            
+            // 일식
+            { name: "초밥", emoji: "🍣", category: "일식" },
+            { name: "돈카츠", emoji: "🥩", category: "일식" },
+            { name: "라멘", emoji: "🍜", category: "일식" },
+            { name: "우동", emoji: "🍲", category: "일식" },
+            
+            // 중식
+            { name: "짜장면", emoji: "🍜", category: "중식" },
+            { name: "짬뽕", emoji: "🍜", category: "중식" },
+            { name: "마라탕", emoji: "🥘", category: "중식" },
+            { name: "만두", emoji: "🥟", category: "중식" },
+            
+            // 양식 및 기타
+            { name: "피자", emoji: "🍕", category: "양식" },
+            { name: "파스타", emoji: "🍝", category: "양식" },
+            { name: "햄버거", emoji: "🍔", category: "양식" },
+            { name: "스테이크", emoji: "🥩", category: "양식" },
+            { name: "타코", emoji: "🌮", category: "멕시칸" },
+            { name: "쌀국수", emoji: "🍜", category: "아시안" },
+            { name: "카레", emoji: "🍛", category: "아시안" }
+        ];
+
+        let isRolling = false;
+
+        function recommendMenu() {
+            if (isRolling) return;
+            isRolling = true;
+
+            const emojiEl = document.getElementById("emoji");
+            const foodNameEl = document.getElementById("food-name");
+            const categoryEl = document.getElementById("category");
+            const btn = document.getElementById("recommend-btn");
+
+            categoryEl.classList.remove("show");
+            emojiEl.classList.add("rolling");
+            btn.disabled = true;
+
+            let counter = 0;
+            const maxRolls = 15; // 롤링되는 횟수
+            
+            // 롤링 이펙트
+            const interval = setInterval(() => {
+                const randomTemp = menuList[Math.floor(Math.random() * menuList.length)];
+                emojiEl.textContent = randomTemp.emoji;
+                foodNameEl.textContent = randomTemp.name;
+                counter++;
+
+                if (counter >= maxRolls) {
+                    clearInterval(interval);
+                    
+                    // 최종 메뉴 랜덤 선택
+                    const selected = menuList[Math.floor(Math.random() * menuList.length)];
+                    emojiEl.textContent = selected.emoji;
+                    foodNameEl.textContent = selected.name;
+                    categoryEl.textContent = selected.category;
+
+                    emojiEl.classList.remove("rolling");
+                    emojiEl.classList.add("pop-in");
+                    categoryEl.classList.add("show");
+
+                    setTimeout(() => {
+                        emojiEl.classList.remove("pop-in");
+                    }, 400);
+
+                    btn.disabled = false;
+                    isRolling = false;
+                }
+            }, 80);
+        }
+    </script>
+</body>
+</html>
